@@ -1,0 +1,17 @@
+[package]
+name = "opencsd-sys"
+version = "0.1.0"
+edition = "2021"
+authors = ["Kesavan Yogeswaran <hikes@google.com>"]
+description = "Bindings to OpenCSD, an ARM CoreSight trace decoder"
+license = "Apache-2.0"
+categories = ["external-ffi-bindings"]
+homepage = "https://github.com/kesyog/opencsd-sys"
+exclude = ["vendor/OpenCSD/decoder/tests"]
+links = "opencsd_c_api"
+
+[build-dependencies]
+fs_extra = "1.3"
+
+[target.'cfg(windows)'.build-dependencies]
+bindgen = { version = "0.71" }

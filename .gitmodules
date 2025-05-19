@@ -1,0 +1,3 @@
+[submodule "vendor/OpenCSD"]
+	path = vendor/OpenCSD
+	url = https://github.com/Linaro/OpenCSD.git
