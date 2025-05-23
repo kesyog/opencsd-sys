@@ -1,6 +1,6 @@
 [package]
 name = "opencsd-sys"
-version = "0.1.1"
+version = "0.1.2"
 edition = "2021"
 authors = ["Kesavan Yogeswaran <hikes@google.com>"]
 description = "Bindings to OpenCSD, an ARM CoreSight trace decoder"
@@ -8,6 +8,12 @@ license = "Apache-2.0"
 categories = ["external-ffi-bindings"]
 homepage = "https://github.com/kesyog/opencsd-sys"
 exclude = [
+  "vendor/OpenCSD/decoder/**/*.a",
+  "vendor/OpenCSD/decoder/**/*.bin",
+  "vendor/OpenCSD/decoder/**/*.so",
+  "vendor/OpenCSD/decoder/**/*.txt",
+  "vendor/OpenCSD/decoder/docs",
+  "vendor/OpenCSD/decoder/**/builddir",
   "vendor/OpenCSD/decoder/tests/snapshots", 
   "vendor/OpenCSD/decoder/tests/snapshots-ete"
 ]
