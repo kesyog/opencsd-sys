@@ -13,7 +13,6 @@
 // limitations under the License.
 
 use std::{
-    num::NonZero,
     path::{Path, PathBuf},
     process::Command,
 };
@@ -81,7 +80,7 @@ fn main() {
     .unwrap();
     let copied_opencsd = out_path.join("OpenCSD");
 
-    let num_jobs = std::thread::available_parallelism().unwrap_or(NonZero::new(1).unwrap());
+    let num_jobs = std::env::var("NUM_JOBS").unwrap_or_else(|_| String::from("1"));
     let makefile_path: PathBuf = [
         &copied_opencsd.to_string_lossy(),
         "decoder",
@@ -96,7 +95,7 @@ fn main() {
     make_command.env_remove("DEBUG");
 
     assert!(make_command
-        .args(["-j", &num_jobs.to_string()])
+        .args(["-j", &num_jobs])
         .args(["-C", &makefile_path.to_string_lossy()])
         .status()
         .unwrap()

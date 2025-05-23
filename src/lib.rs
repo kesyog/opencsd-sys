@@ -12,6 +12,9 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+//! Auto-generated Rust bindings to the C API of the [OpenCSD](https://github.com/Linaro/OpenCSD)
+//! library. OpenCSD is an open-source decoder for ARM CoreSight trace streams.
+
 #![allow(non_upper_case_globals)]
 #![allow(non_camel_case_types)]
 #![allow(non_snake_case)]
