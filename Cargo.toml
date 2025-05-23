@@ -7,7 +7,10 @@ description = "Bindings to OpenCSD, an ARM CoreSight trace decoder"
 license = "Apache-2.0"
 categories = ["external-ffi-bindings"]
 homepage = "https://github.com/kesyog/opencsd-sys"
-exclude = ["vendor/OpenCSD/decoder/tests"]
+exclude = [
+  "vendor/OpenCSD/decoder/tests/snapshots", 
+  "vendor/OpenCSD/decoder/tests/snapshots-ete"
+]
 links = "opencsd_c_api"
 
 [build-dependencies]
