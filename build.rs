@@ -99,8 +99,6 @@ fn main() {
         .include(&opencsd_source)
         .compile("opencsd");
 
-    println!("cargo:rustc-link-lib=static=opencsd");
-    println!("cargo:rustc-link-lib=static=opencsd_c_api");
     println!("cargo::rerun-if-changed=vendor/OpenCSD/decoder/include");
     println!("cargo::rerun-if-changed=vendor/OpenCSD/decoder/source");
 
