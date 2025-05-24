@@ -19,6 +19,7 @@
 #![allow(non_camel_case_types)]
 #![allow(non_snake_case)]
 #![allow(unsafe_op_in_unsafe_fn)]
+#![allow(clippy::all)]
 
 #[cfg(target_os = "windows")]
 include!(concat!(env!("OUT_DIR"), "/bindings.rs"));
