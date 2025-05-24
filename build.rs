@@ -13,25 +13,9 @@
 // limitations under the License.
 
 use std::{
+    ffi::OsStr,
     path::{Path, PathBuf},
-    process::Command,
 };
-
-#[cfg(any(
-    target_os = "freebsd",
-    target_os = "dragonfly",
-    target_os = "netbsd",
-    target_os = "openbsd",
-))]
-const MAKE_CMD: &str = "gmake";
-
-#[cfg(not(any(
-    target_os = "freebsd",
-    target_os = "dragonfly",
-    target_os = "netbsd",
-    target_os = "openbsd",
-)))]
-const MAKE_CMD: &str = "make";
 
 #[cfg(not(target_os = "windows"))]
 fn generate_bindings(_opencsd_path: &Path, _output_dir: &Path) {
@@ -42,7 +26,6 @@ fn generate_bindings(_opencsd_path: &Path, _output_dir: &Path) {
 fn generate_bindings(opencsd_path: &Path, output_dir: &Path) {
     let c_api_include_path: PathBuf = [
         opencsd_path,
-        Path::new("decoder"),
         Path::new("include"),
         Path::new("opencsd"),
         Path::new("c_api"),
@@ -69,55 +52,57 @@ fn generate_bindings(opencsd_path: &Path, output_dir: &Path) {
 fn main() {
     let out_path = PathBuf::from(std::env::var("OUT_DIR").unwrap());
     // Path to vendored OpenCSD repository
-    let opencsd_path: PathBuf = ["vendor", "OpenCSD"].iter().collect();
-    // OpenCSD's build generates files in-tree. Since build scripts should only write to OUT_DIR,
-    // copy the library there before building it.
-    fs_extra::dir::copy(
-        &opencsd_path,
-        &out_path,
-        &fs_extra::dir::CopyOptions::new().overwrite(true),
-    )
-    .unwrap();
-    let copied_opencsd = out_path.join("OpenCSD");
+    let opencsd_root: PathBuf = ["vendor", "OpenCSD", "decoder"].iter().collect();
+    let opencsd_include = opencsd_root.join("include");
+    let opencsd_source = opencsd_root.join("source");
+    let opencsd_c_api_source = opencsd_source.join("c_api");
 
-    let num_jobs = std::env::var("NUM_JOBS").unwrap_or_else(|_| String::from("1"));
-    let makefile_path: PathBuf = [
-        &copied_opencsd.to_string_lossy(),
-        "decoder",
-        "build",
-        "linux",
-    ]
-    .iter()
-    .collect();
-    let mut make_command = Command::new(MAKE_CMD);
-    // Cargo populates the DEBUG environment variable, which clashes with a make variable in
-    // OpenCSD
-    make_command.env_remove("DEBUG");
+    // OpenCSD's makefiles have some downsides so we drive the build ourselves:
+    // * They do not support out-of-tree builds
+    // * They build all libraries, including unused test binaries and shared libraries
+    cc::Build::new()
+        .cpp(true)
+        .std("c++14")
+        .file(opencsd_c_api_source.join("ocsd_c_api.cpp"))
+        .file(opencsd_c_api_source.join("ocsd_c_api_custom_obj.cpp"))
+        .flag("-Wno-switch")
+        .opt_level(2)
+        .extra_warnings(false)
+        .define("NDEBUG", None)
+        .include(&opencsd_include)
+        .include(&opencsd_c_api_source)
+        .compile("opencsd_c_api");
 
-    assert!(make_command
-        .args(["-j", &num_jobs])
-        .args(["-C", &makefile_path.to_string_lossy()])
-        .status()
+    let decoder_files = glob::glob("vendor/OpenCSD/decoder/source/**/*.cpp")
         .unwrap()
-        .success());
+        // Filter out the C API glue, which is compiled separately
+        .filter(|path| {
+            if let Ok(path) = path {
+                !path
+                    .components()
+                    .any(|s| s == std::path::Component::Normal(OsStr::new("c_api")))
+            } else {
+                true
+            }
+        })
+        .collect::<Result<Vec<_>, _>>()
+        .unwrap();
+    cc::Build::new()
+        .cpp(true)
+        .std("c++14")
+        .files(decoder_files)
+        .opt_level(2)
+        .flag("-Wno-switch")
+        .extra_warnings(false)
+        .define("NDEBUG", None)
+        .include(&opencsd_include)
+        .include(&opencsd_source)
+        .compile("opencsd");
+
     println!("cargo:rustc-link-lib=static=opencsd");
     println!("cargo:rustc-link-lib=static=opencsd_c_api");
-    println!("cargo:rustc-link-lib=stdc++");
     println!("cargo::rerun-if-changed=vendor/OpenCSD/decoder/include");
     println!("cargo::rerun-if-changed=vendor/OpenCSD/decoder/source");
 
-    let build_dir: PathBuf = [
-        &copied_opencsd.to_string_lossy(),
-        "decoder",
-        "lib",
-        "builddir",
-    ]
-    .iter()
-    .collect();
-    println!(
-        "cargo:rustc-link-search=native={}",
-        &build_dir.to_string_lossy()
-    );
-
-    generate_bindings(&opencsd_path, &out_path);
+    generate_bindings(&opencsd_root, &out_path);
 }
