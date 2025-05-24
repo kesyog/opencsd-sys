@@ -32,9 +32,7 @@ fn generate_bindings(opencsd_path: &Path, output_dir: &Path) {
     ]
     .iter()
     .collect();
-    let opencsd_include_path: PathBuf = [opencsd_path, Path::new("decoder"), Path::new("include")]
-        .iter()
-        .collect();
+    let opencsd_include_path: PathBuf = [opencsd_path, Path::new("include")].iter().collect();
     let bindings = bindgen::Builder::default()
         .header("wrapper.h")
         .clang_arg(format!("-I{}", &c_api_include_path.to_string_lossy()))
