@@ -6,7 +6,7 @@ authors = ["Kesavan Yogeswaran <hikes@google.com>"]
 description = "Bindings to OpenCSD, an ARM CoreSight trace decoder"
 license = "Apache-2.0"
 categories = ["external-ffi-bindings"]
-homepage = "https://github.com/kesyog/opencsd-sys"
+repository = "https://github.com/kesyog/opencsd-sys"
 exclude = [
   "vendor/OpenCSD/decoder/build",
   "vendor/OpenCSD/decoder/docs",
