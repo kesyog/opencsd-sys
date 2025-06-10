@@ -1,3 +1,4 @@
 [submodule "vendor/OpenCSD"]
 	path = vendor/OpenCSD
-	url = https://github.com/Linaro/OpenCSD.git
+	url = https://github.com/kesyog/OpenCSD.git
+  branch = armv8_1_branches
